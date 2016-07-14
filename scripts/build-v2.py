@@ -82,6 +82,7 @@ proj = FontProject(rg.font, BASEDIR, "res/roboto.cfg")
 FAMILYNAME = "Roboto"
 
 proj.buildOTF = True
+proj.buildAutohintedTTF = True
 #proj.compatible = True
 
 proj.generateFont(th.font, "%s/Thin/Regular/Th" % FAMILYNAME)

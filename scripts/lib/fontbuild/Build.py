@@ -19,6 +19,7 @@ import sys
 
 from booleanOperations import BooleanOperationManager
 from cu2qu.ufo import fonts_to_quadratic
+from fontmake.ttfautohint import ttfautohint
 from fontTools.misc.transform import Transform
 from robofab.world import OpenFont
 from ufo2ft import compileOTF, compileTTF
@@ -66,6 +67,7 @@ class FontProject:
         self.noItalic = self.config.get("glyphs","noitalic").split()
 
         self.buildOTF = False
+        self.buildAutohintedTTF = False
         self.compatible = False
         self.generatedFonts = []
 
@@ -75,10 +77,12 @@ class FontProject:
             resource = resourceFile.read()
         return resource.splitlines()
 
-    def generateOutputPath(self, font, ext):
+    def generateOutputPath(self, font, ext, autohinted=False):
         family = font.info.familyName.replace(" ", "")
         style = font.info.styleName.replace(" ", "")
         path = os.path.join(self.basedir, self.builddir, family + ext.upper())
+        if autohinted:
+            path = os.path.join(path, "autohinted")
         if not os.path.exists(path):
             os.makedirs(path)
         return os.path.join(path, "%s-%s.%s" % (family, style, ext))
@@ -185,6 +189,12 @@ class FontProject:
                 font, ttfName,
                 self.thinGlyphOrder if "Thin" in ttfName else self.glyphOrder,
                 truetype=True)
+
+            if self.buildAutohintedTTF:
+                hintedTtfName = self.generateOutputPath(
+                    font, "ttf", autohinted=True)
+                log(os.path.join(*hintedTtfName.split(os.path.sep)[-2:]))
+                ttfautohint(ttfName, hintedTtfName)
 
 
 def transformGlyphMembers(g, m):
